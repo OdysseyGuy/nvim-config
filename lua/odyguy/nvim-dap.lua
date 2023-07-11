@@ -59,11 +59,11 @@ if vim.fn.has("win32") == 1 then
 	dap.adapters.codelldb.executable.detached = false
 end
 
--- configurations for c debugging
+-- configurations for c debugging with cppdbg
 dap.configurations.c = {
 	{
 		name = "Launch file",
-		type = "cppdbg",
+		type = "cppdbg", -- must match the adapter
 		request = "launch",
 		program = function()
 			return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
@@ -102,3 +102,14 @@ dap.configurations.c = {
 -- use the same configuration for rust and c++
 dap.configurations.cpp = dap.configurations.c
 dap.configurations.rust = dap.configurations.c
+
+dap.configurations.python = {
+	{
+		type = "python",
+		request = "launch",
+		program = "${file}",
+		pythonPath = function()
+			return "/usr/bin/python"
+		end,
+	},
+}
