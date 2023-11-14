@@ -6,3 +6,5 @@ require('nvim-tree').setup({
 })
 
 require('nvim-tree.view').View.winopts.signcolumn = 'no'
+
+vim.keymap.set('n', '<leader>nt', '<cmd>NvimTreeToggle<cr>', { silent = true })

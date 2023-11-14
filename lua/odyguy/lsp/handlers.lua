@@ -103,7 +103,7 @@ end
 local augroup = vim.api.nvim_create_augroup('LspFormatting', {})
 
 M.on_attach = function(client, bufnr)
-  lsp_keymaps(bufnr)
+  -- lsp_keymaps(bufnr)
   if client.supports_method('textDocument/formatting') and client then
     vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
     vim.api.nvim_create_autocmd('BufWritePre', {

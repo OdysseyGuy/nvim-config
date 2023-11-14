@@ -51,6 +51,10 @@ dap.adapters.delve = {
   },
 }
 
+dap.adapters.goadapter = {
+  type = 'server',
+}
+
 -- windows specific options
 if vim.fn.has('win32') == 1 then
   dap.adapters.cppdbg.options = {
@@ -105,11 +109,103 @@ dap.configurations.rust = dap.configurations.c
 
 dap.configurations.python = {
   {
-    type = 'python',
+    name = 'Launch file',
+    type = 'debugpy',
     request = 'launch',
     program = '${file}',
     pythonPath = function()
-      return '/usr/bin/python'
+      return '/usr/bin/python3'
+    end,
+  },
+  {
+    name = 'Launch file with arguments',
+    type = 'debugpy',
+    request = 'launch',
+    program = '${file}',
+    args = function() end,
+    pythonPath = function()
+      return '/usr/bin/python3'
+    end,
+  },
+  {
+    name = 'Run doctest in file',
+    type = 'debugpy',
+    request = 'launch',
+    module = 'doctest',
+    args = { '${file}' },
+    noDebug = true,
+    pythonPath = function()
+      return '/usr/bin/python3'
     end,
   },
 }
+
+dap.configurations.go = {
+  {
+    name = 'Launch file (delve)',
+    type = 'delve',
+    request = 'launch',
+  },
+  {
+    name = 'Launch file (go-adapter)',
+    type = 'goadapter',
+    request = 'launch',
+  },
+}
+
+vim.fn.sign_define('DapBreakpoint', { text = '●', texthl = '', linehl = '', numhl = '' })
+
+-- dap ui
+local dapui = require('dapui')
+dapui.setup()
+
+-- dap virtual text
+require('nvim-dap-virtual-text').setup({
+  enabled = true,
+  highlight_new_as_changed = true,
+  only_first_definition = false,
+  show_stop_reason = true,
+  virt_text_pos = vim.fn.has('nvim-0.10') == 1 and 'inline' or 'eol',
+})
+
+local dap_ui_widgets = require('dap.ui.widgets')
+
+-- nvim-dap keymappings
+vim.keymap.set('n', '<leader>db', dap.toggle_breakpoint, { silent = true })
+vim.keymap.set('n', '<leader>dB', function()
+  local cond = vim.ui.input({ prompt = 'Breakpoint condition' }, function(input)
+    dap.set_breakpoint(input)
+  end)
+end, { silent = true })
+vim.keymap.set('n', '<leader>ds', dap.close, { silent = true })
+vim.keymap.set('n', '<leader>dc', dap.continue, { silent = true })
+vim.keymap.set('n', '<leader>dk', dap.up, { silent = true })
+vim.keymap.set('n', '<leader>dj', dap.down, { silent = true })
+vim.keymap.set('n', '<leader>dn', dap.run_to_cursor, { silent = true })
+vim.keymap.set('n', '<leader>d_', dap.run_last, { silent = true })
+vim.keymap.set('n', '<leader>di', dap_ui_widgets.hover, { silent = true })
+vim.keymap.set('n', '<leader>dS', function()
+  dap_ui_widgets.centered_float(dap_ui_widgets.scopes)
+end, { silent = true })
+
+-- dapui keymappings
+vim.keymap.set('n', '<leader>duo', dapui.open, { silent = true })
+vim.keymap.set('n', '<leader>duc', dapui.close, { silent = true })
+vim.keymap.set('n', '<leader>dui', dapui.toggle, { silent = true })
+
+-- telescope-dap
+vim.keymap.set('n', '<leader>pdc', function()
+  require('telescope').extensions.dap.commands()
+end)
+vim.keymap.set('n', '<leader>pdg', function()
+  require('telescope').extensions.dap.configurations()
+end)
+vim.keymap.set('n', '<leader>pdv', function()
+  require('telescope').extensions.dap.variables()
+end)
+vim.keymap.set('n', '<leader>pdb', function()
+  require('telescope').extensions.dap.list_breakpoints()
+end)
+vim.keymap.set('n', '<leader>pdf', function()
+  require('telescope').extensions.dap.frames()
+end)

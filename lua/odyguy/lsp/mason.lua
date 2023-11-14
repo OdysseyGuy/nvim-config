@@ -79,6 +79,7 @@ mason_lspconfig.setup_handlers({
   end,
   ['clangd'] = function()
     lspconfig.clangd.setup({
+      on_attach = on_attach,
       capabilities = clangd_capabilities,
     })
   end,
